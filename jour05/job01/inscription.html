@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription</title>
+    <style>
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Inscription</h1>
+    <form id="registrationForm">
+        <div>
+            <label for="nom">Nom :</label>
+            <input type="text" id="nom" name="nom" required>
+            <span id="nomError" class="error"></span>
+        </div>
+        <div>
+            <label for="prenom">Prénom :</label>
+            <input type="text" id="prenom" name="prenom" required>
+            <span id="prenomError" class="error"></span>
+        </div>
+        <div>
+            <label for="email">Email :</label>
+            <input type="email" id="email" name="email" required>
+            <span id="emailError" class="error"></span>
+        </div>
+        <div>
+            <label for="password">Mot de passe :</label>
+            <input type="password" id="password" name="password" required>
+            <span id="passwordError" class="error"></span>
+        </div>
+        <div>
+            <label for="confirmPassword">Confirmer le mot de passe :</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+            <span id="confirmPasswordError" class="error"></span>
+        </div>
+        <div>
+            <label for="adresse">Adresse :</label>
+            <input type="text" id="adresse" name="adresse" required>
+            <span id="adresseError" class="error"></span>
+        </div>
+        <div>
+            <label for="codePostal">Code postal :</label>
+            <input type="text" id="codePostal" name="codePostal" required>
+            <span id="codePostalError" class="error"></span>
+        </div>
+        <button type="submit">S'inscrire</button>
+    </form>
+
+    <script>
+        // Sélectionner le formulaire et tous les champs d'entrée
+        const form = document.getElementById('registrationForm');
+        const inputs = form.querySelectorAll('input'); // Récupère tous les inputs du formulaire
+        const passwordInput = document.getElementById('password'); // Sélectionner le champ du mot de passe
+        const confirmPasswordInput = document.getElementById('confirmPassword'); // Sélectionner le champ de confirmation du mot de passe
+        const confirmPasswordError = document.getElementById('confirmPasswordError'); // Sélectionner le span pour l'erreur de confirmation du mot de passe
+
+        // Fonction asynchrone de validation pour chaque champ d'entrée
+        const validateField = async (field) => {
+            const value = field.value.trim(); // Récupérer la valeur du champ sans espaces en début ou fin
+            
+            // Vérifier le champ en fonction de son ID
+            switch (field.id) {
+                case 'nom':
+                case 'prenom':
+                    // Vérifie si la première lettre est une majuscule et si la longueur est d'au moins 4 caractères
+                    if (value.length < 4 || !/^[A-Z]/.test(value)) {
+                        throw new Error(`La première lettre doit être majuscule et contenir au moins 4 caractères`);
+                    }
+                    break;
+                case 'email':
+                    // Vérifie que l'email est dans un format valide
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        throw new Error('Email invalide');
+                    }
+                    break;
+                case 'password':
+                    // Vérifie si le mot de passe contient au moins 8 caractères, une majuscule, un chiffre et un caractère spécial
+                    if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/.test(value)) {
+                        throw new Error('Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial');
+                    }
+                    break;
+                case 'confirmPassword':
+                    // Vérifie que le champ de confirmation correspond au mot de passe
+                    if (value !== passwordInput.value) {
+                        throw new Error('Les mots de passe ne correspondent pas');
+                    }
+                    break;
+                case 'codePostal':
+                    // Vérifie que le code postal est composé de 5 chiffres
+                    if (!/^\d{5}$/.test(value)) {
+                        throw new Error('Code postal invalide (5 chiffres requis)');
+                    }
+                    break;
+                default:
+                    // Si le champ est vide et requis, lever une erreur
+                    if (value.length === 0) {
+                        throw new Error('Ce champ est requis');
+                    }
+            }
+        };
+
+        // Ajouter un écouteur d'événement pour chaque champ d'entrée (pour la validation en temps réel)
+        inputs.forEach(input => {
+            input.addEventListener('input', async () => {
+                try {
+                    // Tenter de valider le champ actuel
+                    await validateField(input);
+                    document.getElementById(`${input.id}Error`).textContent = ''; // Si valide, vider le message d'erreur
+                } catch (error) {
+                    // Si une erreur de validation survient, afficher le message d'erreur
+                    document.getElementById(`${input.id}Error`).textContent = error.message;
+                }
+            });
+        });
+
+        // Écouteur d'événement pour la soumission du formulaire
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Empêcher la soumission par défaut du formulaire
+
+            let isValid = true; // Variable pour suivre l'état global de la validation
+
+            // Valider chaque champ d'entrée lors de la soumission du formulaire
+            for (let input of inputs) {
+                try {
+                    await validateField(input); // Valider chaque champ
+                } catch (error) {
+                    isValid = false; // Si une validation échoue, marquer le formulaire comme invalide
+                    document.getElementById(`${input.id}Error`).textContent = error.message; // Afficher le message d'erreur
+                }
+            }
+
+            // Si tous les champs sont valides, soumettre les données
+            if (isValid) {
+                console.log('Formulaire valide, envoi des données...');
+                // Ici, vous pouvez ajouter le code pour envoyer les données au serveur
+            }
+        });
+
+    </script>
+</body>
+</html>
